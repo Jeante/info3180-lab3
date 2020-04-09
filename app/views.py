@@ -4,10 +4,11 @@ Jinja2 Documentation:    http://jinja.pocoo.org/2/documentation/
 Werkzeug Documentation:  http://werkzeug.pocoo.org/documentation/
 This file creates your application.
 """
-
+from app import mail
+from flask_mail import Message
 from app import app
 from flask import render_template, request, redirect, url_for, flash
-
+from app.forms import ContactForm
 
 ###
 # Routing for your application.
@@ -18,11 +19,31 @@ def home():
     """Render website's home page."""
     return render_template('home.html')
 
+@app.route("/")
+def index():
+    msg = Message(ContactForm.subject.data, sender=(ContactForm.name.data,
+    ContactForm.email.data),recipients=["to@example.com"])
+    msg.body = ContactForm.area.data
+    mail.send(msg) 
+
 
 @app.route('/about/')
 def about():
     """Render the website's about page."""
     return render_template('about.html', name="Mary Jane")
+
+@app.route('/contact', methods=['GET', 'POST'])
+def contact():
+    form= ContactForm()
+    if form.validate_on_submit():
+        msg = Message(form.subject.data,
+                      sender=(form.name.data , form.email.data),
+                      recipients=["j.bravo@gmail"])
+        msg.body = form.area.data
+        mail.send(msg)
+        flash(u'Message was successfully sent!')
+        return redirect('/')
+    return render_template('contact.html', form=form)
 
 
 ###
@@ -45,6 +66,7 @@ def send_text_file(file_name):
     """Send your static text file."""
     file_dot_text = file_name + '.txt'
     return app.send_static_file(file_dot_text)
+
 
 
 @app.after_request

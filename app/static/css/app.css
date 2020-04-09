@@ -1,3 +1,11 @@
 body {
     padding-top: 5rem;
 }
+.color{
+    color: red;
+}
+
+.button{
+
+    background-color:blue;
+}
